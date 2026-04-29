@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, UTC  # Added UTC here
 from collections import Counter
 
 from dotenv import load_dotenv
@@ -140,7 +140,7 @@ def upsert_daily_metric(
                 "avg_sentiment_score": avg_sentiment,
                 "dominant_sentiment_label": dominant_label,
                 "article_count": article_count,
-                "updated_at": datetime.now(UTC),
+                "updated_at": datetime.now(UTC),  # Fixed NameError here
             }
         },
         upsert=True,
@@ -150,7 +150,8 @@ def upsert_daily_metric(
 def run_daily_aggregation(days_back: int = 90):
     news_coll, prices_coll, daily_coll = get_collections()
 
-    today = datetime.utcnow().date()
+    # Fixed DeprecationWarning here
+    today = datetime.now(UTC).date()
     start_date = today - timedelta(days=days_back)
 
     for ticker in TICKERS:
@@ -188,4 +189,4 @@ def run_daily_aggregation(days_back: int = 90):
 
 
 if __name__ == "__main__":
-    run_daily_aggregation(days_back=30) 
+    run_daily_aggregation(days_back=30)
