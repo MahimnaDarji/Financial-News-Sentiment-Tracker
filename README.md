@@ -1,9 +1,5 @@
 ## Step 1: Go to project folder
 
-```powershell
-cd "C:\Users\darji\Desktop\financial-news-sentiment-tracker"
-```
-
 ## Step 2: Activate virtual environment
 
 ```powershell
