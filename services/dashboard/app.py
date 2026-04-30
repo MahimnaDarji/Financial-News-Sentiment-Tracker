@@ -518,7 +518,7 @@ def render_ticker_watchlist(tickers: List[str], days: int, dark_mode: bool, sele
         unsafe_allow_html=True,
     )
     st.markdown(
-        '<div class="section-note">Compact market context across the tracked names.</div>',
+        '<div class="section-note">Snapshot of tracked tickers with recent price movement and short-term trend</div>',
         unsafe_allow_html=True,
     )
 
@@ -594,19 +594,19 @@ def main():
         st.markdown(
             """
             <div class="rail-brand">
-                <div class="rail-logo">FN</div>
                 <div>
                     <div class="rail-title">Market Dashboard</div>
                     <div class="rail-subtitle">Financial News Sentiment Tracker</div>
                 </div>
             </div>
+            <div class="rail-divider" aria-hidden="true"></div>
             """,
             unsafe_allow_html=True,
         )
 
-        dark_choice = choose_segmented("Theme", ["Dark", "Light"], default_index=0 if st.session_state.dark_mode else 1, key="theme_choice")
-        dark_mode = dark_choice == "Dark"
-        st.session_state.dark_mode = dark_mode
+        # Enforce dark mode (remove Light theme option)
+        st.session_state.dark_mode = True
+        dark_mode = True
 
         try:
             tickers = fetch_tickers()
@@ -669,9 +669,17 @@ def main():
             background-color: {bg_color};
         }}
         .block-container {{
-            padding-top: 0.7rem;
-            padding-bottom: 0.8rem;
-        }}
+                /* Ensure content starts below Streamlit's top chrome/tool bar.
+                   Use a sufficiently large top padding and a responsive increase
+                   on wide screens. Avoid inserting any empty elements. */
+                padding-top: max(3.5rem, env(safe-area-inset-top));
+                padding-bottom: 0.8rem;
+            }}
+            @media (min-width: 1200px) {{
+                .block-container {{
+                    padding-top: max(4.25rem, env(safe-area-inset-top));
+                }}
+            }}
         section[data-testid="stSidebar"] {{
             background: linear-gradient(180deg, #09111f 0%, #0b1424 100%);
             border-right: 1px solid rgba(148,163,184,0.14);
@@ -1005,33 +1013,29 @@ def main():
         }}
         .rail-brand {{
             display:flex;
-            align-items:center;
-            gap:0.7rem;
-            margin-bottom:0.9rem;
-        }}
-        .rail-logo {{
-            width:38px;
-            height:38px;
-            border-radius:12px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            background: linear-gradient(135deg, rgba(57,255,20,0.22), rgba(15,23,42,0.95));
-            color:{NEON_GREEN};
-            border: 1px solid rgba(57,255,20,0.28);
-            font-weight:800;
-            letter-spacing:0.04em;
+            align-items:flex-start;
+            gap:0.5rem;
+            margin-bottom:0.4rem;
+            padding: 0 1rem;
         }}
         .rail-title {{
-            font-size:1rem;
-            font-weight:700;
+            font-size:1.12rem;
+            font-weight:800;
             color:{text_color};
-            line-height:1.15;
+            line-height:1.05;
+            margin-bottom:0.12rem;
         }}
         .rail-subtitle {{
-            font-size:0.8rem;
+            font-size:0.84rem;
             color:{subtext_color};
-            margin-top:0.1rem;
+            margin-top:0;
+            opacity:0.95;
+        }}
+        .rail-divider {{
+            height:1px;
+            background: rgba(148,163,184,0.06);
+            margin: 0.6rem 0 0.75rem 0;
+            border-radius:1px;
         }}
         .rail-section {{
             margin-top:0.85rem;
@@ -1168,7 +1172,7 @@ def main():
                 <div>
                     <div class="hero-title">Selected ticker</div>
                     <div class="hero-value">{ticker}</div>
-                    <div class="hero-subtitle">News sentiment and market behavior across {days} days. Use the workspace below to inspect price action, tone, volume, and correlation without flattening the hierarchy.</div>
+                    <div class="hero-subtitle">View how price, sentiment, and news activity have moved together over the last 14 days</div>
                 </div>
                 <div class="hero-state-row">
                     <div class="hero-pill">
@@ -1226,7 +1230,7 @@ def main():
 
     st.markdown('<div class="glass-card card">', unsafe_allow_html=True)
     st.markdown('<div class="section-label">Chart workspace</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-note">One dominant market chart on the left with supporting context stacked on the right.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-note">Price trend with sentiment, volume, and correlation shown alongside for context</div>', unsafe_allow_html=True)
 
     workspace_left, workspace_right = st.columns([1.75, 1.0])
 
@@ -1251,7 +1255,7 @@ def main():
         st.markdown('<div class="insight-card">', unsafe_allow_html=True)
         st.markdown('<div class="chart-caption">News flow</div>', unsafe_allow_html=True)
         st.markdown('<div class="chart-label">Article volume</div>', unsafe_allow_html=True)
-        st.markdown('<div class="section-note" style="margin-bottom:0.45rem;">How much reporting is feeding the signal set.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-note" style="margin-bottom:0.45rem;">Daily article volume showing how much coverage the ticker is getting</div>', unsafe_allow_html=True)
         fig_count = make_volume_bars(df, dark_mode, height=165)
         st.plotly_chart(fig_count, use_container_width=True, config={"displayModeBar": False})
         st.markdown('</div>', unsafe_allow_html=True)
